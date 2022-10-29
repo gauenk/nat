@@ -70,9 +70,7 @@ class NATTENQKRPBFunction(Function):
         query = query.contiguous()
         key = key.contiguous()
         attn = nattenqkrpb_cuda.forward(
-                query,
-                key,
-                rpb)
+                query,key,rpb)
         ctx.save_for_backward(query, key)
         return attn
 

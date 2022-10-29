@@ -78,7 +78,7 @@ class NATLayer(nn.Module):
         self.dim = dim
         self.num_heads = num_heads
         self.mlp_ratio = mlp_ratio
-        
+
         self.norm1 = norm_layer(dim)
         self.attn = NeighborhoodAttention(
             dim, kernel_size=kernel_size, num_heads=num_heads,

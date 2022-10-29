@@ -10,7 +10,7 @@ from torch.nn.functional import pad
 from torch.nn.init import trunc_normal_
 from torch.autograd import Function
 from torch.cuda.amp import custom_fwd, custom_bwd
-from torch.utils.cpp_extension import load, is_ninja_available
+from torch.utils.cpp_extension import load, is_ninja_available, CUDAExtension
 import warnings
 import os
 
@@ -18,9 +18,13 @@ import os
 if is_ninja_available():
     this_dir = os.path.dirname(os.path.realpath(__file__))
     natten1dav_cuda = load(
-        'natten1dav_cuda', [f'{this_dir}/src/natten1dav_cuda.cpp', f'{this_dir}/src/natten1dav_cuda_kernel.cu'], verbose=False)
+        'natten1dav_cuda', [f'{this_dir}/src/natten1dav_cuda.cpp',
+                            f'{this_dir}/src/natten1dav_cuda_kernel.cu'],
+        verbose=False)
     natten1dqkrpb_cuda = load(
-        'natten1dqkrpb_cuda', [f'{this_dir}/src/natten1dqkrpb_cuda.cpp', f'{this_dir}/src/natten1dqkrpb_cuda_kernel.cu'], verbose=False)
+        'natten1dqkrpb_cuda', [f'{this_dir}/src/natten1dqkrpb_cuda.cpp',
+                               f'{this_dir}/src/natten1dqkrpb_cuda_kernel.cu'],
+        verbose=False)
 else:
     warnings.warn("Ninja is not installed, looking up extensions manually.")
     try:
