@@ -793,6 +793,7 @@ __global__ void nattenv_cuda_backward_kernel_fp32(
         const int attnOffset = b * attn.stride(0) + h * attn.stride(1);
         const int outOffset = b * d_out.stride(0) + h * d_out.stride(1) + d;
         scalar_t d_value_update = scalar_t(0);
+
         #pragma unroll
         for (int xi=ni; xi < ei; ++xi){
             const int oni = get_window_start(xi, height, KERNEL_SIZE, NEIGHBORHOOD_SIZE);

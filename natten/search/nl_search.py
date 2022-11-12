@@ -38,7 +38,7 @@ class NLSearch():
 
     def __init__(self,k=7, ps=7, ws=8, nheads=1, chnls=-1, dilation=1,
                  stride0=1, stride1=1, index_reset=True, include_self=False,
-                 use_k=True):
+                 use_k=True,use_tiled=True):
         self.k = k
         self.ps = ps
         self.nheads = nheads
@@ -52,6 +52,7 @@ class NLSearch():
         self.padding = (ps-1)//2
         self.use_k = use_k
         self.index_reset = index_reset
+        self.use_tiled = use_tiled
         pdim = (2 * self.ps - 1)
         self.rpb = nn.Parameter(th.zeros(self.nheads, pdim, pdim))
 
@@ -73,21 +74,45 @@ class NLSearch():
         return dists,inds
 
     def search(self,vid):
+        if self.use_tiled:
+            return self.search_tiled(vid)
+        else:
+            return self.search_hw(vid)
+
+    def search_tiled(self,vid):
 
         # -- patchify --
-        xe = vid
-        ps = self.ps
+        xe,ps = vid,self.ps
+        padding = None
+        self.rpb = self.rpb.to(vid.device)
+
+        # -- unfold --
+        x_patch = unfold(vid,(ps,ps),stride=self.stride0,
+                         dilation=self.dilation)
+
+        # -- self attn --
+        xe_patch = x_patch
+        ye_patch = xe_patch
+
+        # -- neighborhood search --
+        dists = NATTENQKRPBFunction.apply(xe_patch, ye_patch, self.rpb)
+        inds = th.zeros_like(dists).type(th.int32)
+
+        # -- topk --
+        if self.use_k:
+            dists,inds = get_topk(dists,inds,self.k)
+
+        return dists,inds
+
+    def search_hw(self,vid):
+
+        # -- patchify --
+        xe,ps = vid,self.ps
         padding = None
         self.rpb = self.rpb.to(vid.device)
 
         # -- init unfold --
-        # x_patch = unfold(vid,(ps,ps),stride=self.stride0,
-        #                  dilation=self.dilation)
-        # print("x_patch.shape: ",x_patch.shape)
-        # x_patch = rearrange(x_patch,'b (h w c) q -> b q h w c',h=ps,w=ps)
-        # print("x_patch.shape: ",x_patch.shape)
         x_patch = rearrange(vid,'t (H c) h w -> t H h w c',H=self.nheads)
-        print("x_patch.shape: ",x_patch.shape)
 
         # -- self attn --
         xe_patch = x_patch

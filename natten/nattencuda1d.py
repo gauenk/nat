@@ -88,7 +88,6 @@ class NATTEN1DQKRPBFunction(Function):
         d_query, d_key, d_rpb = outputs
         return d_query, d_key, d_rpb, None
 
-
 class NeighborhoodAttention1D(nn.Module):
     """
     Neighborhood Attention 1D Module

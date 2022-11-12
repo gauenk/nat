@@ -38,6 +38,7 @@ def init_search(*args,**kwargs):
     index_reset = optional(kwargs,'index_reset',-1)
     use_k = optional(kwargs,'use_k',k>0)
     include_self = optional(kwargs,'include_self',False)
+    use_tiled = optional(kwargs,'used_tiled',False)
     # name = optional(kwargs,'sfxn','prod')
 
     # -- break here if init --
@@ -48,7 +49,7 @@ def init_search(*args,**kwargs):
                       chnls=chnls, dilation=dil,
                       stride0=stride0, stride1=stride1,
                       index_reset=index_reset,include_self=include_self,
-                      use_k=use_k)
+                      use_k=use_k,use_tiled=use_tiled)
     return search
 
 
