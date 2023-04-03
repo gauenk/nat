@@ -27,5 +27,6 @@ setup(
     license='MIT',
     keywords='burst denoising, non-local search, video denoising, neural network',
     install_requires=[],
-    packages=find_packages(),
+    package_dir={"": "lib"},
+    packages=find_packages("lib"),
 )
